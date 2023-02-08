@@ -1,0 +1,11 @@
+<div
+        class="panel panel-default">
+        <!-- <div class="panel-heading">{{ element.name }}</div> -->
+        <div class="panel-heading" #heading>{{ name }}</div>
+
+        <div class="panel-body">
+            <ng-content></ng-content> 
+            <!-- ng content parent class da app.html de bulunan app-server-elemet icerisindeki
+            default degerlerin child class olan server-element.html eklenmesini sagliyor. -->
+        </div>
+</div>

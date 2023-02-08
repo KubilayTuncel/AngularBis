@@ -1,0 +1,27 @@
+<div class="row">
+  <div class="col-xs-12 col-sm-4">
+    <div class="list-group">
+      <a
+      [routerLink]="['/servers',server.id]"
+      [queryParams]="{allowEdit:server.id===3 ? '1' : '0'}" 
+      fragment="loading"
+        href="#"
+        class="list-group-item"
+        *ngFor="let server of servers">
+        {{ server.name }}
+      </a>
+      <!-- <p>yukaridaki queryparams sorgulamasi id göre allowEdit' e deger atandigi icin 
+        edit-servers.component.ts'deki ngOnit icerisindeki allowEdit degiskenini etkiliyor ve
+        buna göre bu 3 serverdan sadece DevServer a degisiklik izni veriyor. Cünkü devServer in id si 3
+      </p> -->
+    </div>
+  </div>
+  <div class="col-xs-12 col-sm-4">
+    <router-outlet></router-outlet>
+    <!-- <button class="btn btn-primary" (click)="onReload()">Reload page</button>
+    <app-edit-server></app-edit-server>
+    <hr>
+    <app-server></app-server> -->
+  </div>
+</div>
+
