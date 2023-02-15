@@ -34,7 +34,9 @@ export class PostsService{
        return this.http.get<{[key:string]:Post}>('https://angular-5c1b4-default-rtdb.firebaseio.com/posts.json',
        {
         headers:new HttpHeaders({"Custom-Header":"Hello"}),
-        params: searchParams
+        params: searchParams,
+        responseType:'json'
+        
        })
         .pipe(map(responseData=>{
           const postsArray:Post[] = [];
@@ -55,7 +57,9 @@ export class PostsService{
        return this.http.delete<{name:string}>(
             'https://angular-5c1b4-default-rtdb.firebaseio.com/posts.json',
             {
-                observe:'events'
+                observe:'events',
+                responseType:'json'
+                
             }).pipe(tap(event=>{
                 console.log(event);
                 if(event.type===HttpEventType.Response) {

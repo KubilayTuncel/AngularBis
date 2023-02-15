@@ -1,28 +1,21 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
-import { RecipeDetailComponent } from './recipes/recipe-detail/recipe-detail.component';
-import { RecipeEditComponent } from './recipes/recipe-edit/recipe-edit.component';
-import { RecipeStartComponent } from './recipes/recipe-start/recipe-start.component';
-import { RecipesComponent } from './recipes/recipes.component';
-import { ShoppingListComponent } from './shopping-list/shopping-list.component';
+import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+
+
 
 const routes: Routes = [
   {path:'', redirectTo:'/recipes', pathMatch:'full'},
-  {path:'recipes', component:RecipesComponent, children: [
-    {path:'', component:RecipeStartComponent},
-    {path:'new', component:RecipeEditComponent}, //burada new endpoint ini yukari aldikk cünkü id ile baslayan endpoint
-                                                 //dinamik parametre oldugu icin angular bunu bilemez ve new ile karistirabilir.
-                                                 // buradan anlayacagimiz hard kod ile baslayan endpointler dinamik parametreli endpointlerden
-                                                 // önce gelmeli.
-    {path:':id',component:RecipeDetailComponent},
-    {path:':id/edit', component:RecipeEditComponent}
+  //asagidaki path lazy loading : istedigimiz sayfanin sadece yüklenip calismasini sagliyor.
+  // Bunun  icin ayrica app module kisminda RecipeModule 'u sildik ve recipeModelRouting'de
+  // ilk path tanimlamasindaki recipes kismini sildik ve burada path tanimlamasi olarak yazdik.
+  {path:'recipes', loadChildren:()=> import('./recipes/recipes.module').then(m=>m.RecipesModule)},
+  {path:'shopping-list', loadChildren:()=> import('./shopping-list/shopling-list-module').then(m=>m.ShoppingListModule)},
+  {path:'auth', loadChildren:()=> import('./auth/auth.module').then(m=>m.AuthModule)}
 
-  ]},
-  {path:'shopping-list', component:ShoppingListComponent}
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, {preloadingStrategy:PreloadAllModules})],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }
