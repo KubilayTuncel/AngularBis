@@ -1,0 +1,213 @@
+<div class="flex flex-col flex-auto min-w-0">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:py-8 sm:px-10 border-b bg-card dark:bg-transparent">
+        <div class="flex-1 min-w-0">
+            <!-- Title -->
+            <div class="flex flex-row sm:justify-between mt-2">
+                <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+                    {{"navbar.setting.title" | transloco}}
+                </h2>
+                <app-signal></app-signal>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <mat-tab-group animationDuration="0ms" mat-stretch-tabs="false" mat-align-tabs="start" #tabGroup>
+
+        <!--Date and Time  -->
+        <mat-tab label="{{'setting.date-time.title' | transloco}}">
+            <div class="not-prose flex flex-auto w-full md:w-1/2">
+                <mat-card class="ebc_card_standard">
+                    <mat-card-header>
+                        <mat-card-title>{{'setting.date-time.title' | transloco}}</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div>{{'setting.date-time.subtitle' | transloco}} {{actualDate | date:'dd.MM.yyyy HH:mm:ss'}} {{myTimezone}}</div>
+                        <form [formGroup]="dateAndTimeForm" (ngSubmit)="saveDateAndTime()">
+                            <div class="ebc_container_2column">
+                                <mat-form-field>
+                                    <mat-label>{{'setting.date-time.date.label' | transloco}}</mat-label>
+                                    <input matInput [matDatepicker]="picker"
+                                           formControlName="date" [readonly]="!isAdmin">
+                                    <mat-hint>MM/DD/YYYY</mat-hint>
+                                    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                                    <mat-datepicker startView="year" #picker></mat-datepicker>
+                                    <mat-error *ngIf="hasDateFieldErrorRequired()">
+                                        {{"setting.date-time.date.required-error" | transloco}}
+                                    </mat-error>
+                                </mat-form-field>
+                                <mat-form-field>
+                                    <mat-label>{{'setting.date-time.time.label' | transloco}}</mat-label>
+                                    <input matInput
+                                           name="selected_time_A"
+                                           formControlName="time"
+                                           [ngxMatTimepicker]="pickerA"
+                                           placeholder="4:00 PM"
+                                           readonly [readonly]="!isAdmin"/>
+                                    <mat-icon (click)="pickerA.open()"
+                                              class="icon-size-6" matSuffix
+                                              [svgIcon]="'heroicons_solid:clock'">
+                                    </mat-icon>
+                                    <mat-error *ngIf="hasTimeFieldErrorRequired()">
+                                        {{"setting.date-time.time.required-error" | transloco}}
+                                    </mat-error>
+                                </mat-form-field>
+                                <ngx-mat-timepicker #pickerA></ngx-mat-timepicker>
+                            </div>
+                            <button mat-flat-button [color]="'primary'" type="submit"
+                                    [disabled]="dateAndTimeForm.invalid" *ngIf="isAdmin"
+                            >{{'setting.date-time.save-button' | transloco}}</button>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+
+        </mat-tab>
+
+        <!--NTP  -->
+        <mat-tab label="NTP">
+            <div class="not-prose flex flex-auto w-full md:w-1/2">
+                <mat-card class="ebc_card_standard">
+                    <mat-card-header>
+                        <mat-card-title>{{'setting.ntp.title' | transloco}}</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div>{{'setting.ntp.subtitle' | transloco}} {{actualDate | date:'dd.MM.yyyy HH:mm:ss'}} {{myTimezone}}</div>
+                        <form [formGroup]="ntpForm" (ngSubmit)="saveNtpServer()">
+                            <div class="ebc_container_2column">
+                                <mat-form-field>
+                                    <mat-label>{{'setting.ntp.ntp-server.label' | transloco}}</mat-label>
+                                    <input matInput formControlName="ntpServer" [readonly]="!isAdmin">
+                                    <mat-error *ngIf="hasNtpServerFieldErrorRequired()">
+                                        {{"setting.ntp.ntp-server.required-error" | transloco}}
+                                    </mat-error>
+                                    <mat-error *ngIf="hasNtpServerFieldErrorPattern()">
+                                        {{"setting.ntp.ntp-server.pattern-error" | transloco}}
+                                    </mat-error>
+                                </mat-form-field>
+                                <mat-form-field>
+                                    <mat-label>{{'setting.ntp.time-zone.label' | transloco}}</mat-label>
+                                    <mat-select formControlName="timeZone" >
+                                        <mat-option *ngFor="let time of timezones" [value]="time.tzCode">
+                                            {{time.tzCode}}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="hasTimeZoneFieldErrorRequired()">
+                                        {{"setting.ntp.time-zone.required-error" | transloco}}
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                            <button mat-flat-button [color]="'primary'" type="submit"
+                                    [disabled]="ntpForm.invalid" *ngIf="isAdmin"
+                            >{{'setting.date-time.save-button' | transloco}}</button>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </mat-tab>
+
+        <!--System Configuration  -->
+        <mat-tab label="{{'setting.system-config.title' | transloco}}">
+            <div class="not-prose flex flex-auto w-full md:w-1/2">
+                <mat-card class="ebc_card_standard">
+                    <mat-card-header>
+                        <mat-card-title>{{'setting.system-config.title' | transloco}}</mat-card-title>
+                        <mat-card-subtitle></mat-card-subtitle>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="mb-2">{{'setting.system-config.system-info.host-name' | transloco}}: {{systemInfo.hostName}}</div>
+                        <div>{{'setting.system-config.system-info.serial-number' | transloco}}: {{systemInfo.serialNumber}}</div>
+                        <form [formGroup]="systemConfigForm" (ngSubmit)="saveHostInfo()">
+                            <mat-form-field>
+                                <mat-label>{{'setting.system-config.location.label' | transloco}}</mat-label>
+                                <input matInput formControlName="location" [readonly]="!isAdmin">
+                                <mat-error *ngIf="hasLocationFieldErrorRequired()">
+                                    {{"setting.system-config.location.required-error" | transloco}}
+                                </mat-error>
+                            </mat-form-field>
+                            <div class="flex items-center mt-4 gap-4">
+                                <button mat-flat-button [color]="'primary'" type="submit"
+                                        [disabled]="systemConfigForm.invalid" *ngIf="isAdmin"
+                                >{{'setting.date-time.save-button' | transloco}}</button>
+                                <button mat-flat-button [color]="'accent'" type="submit" (click)="updateHostInfo()"
+                                        [disabled]="systemConfigForm.invalid" *ngIf="isAdmin"
+                                >{{'setting.date-time.update-button' | transloco}}</button>
+                            </div>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </mat-tab>
+
+        <!--UPS  -->
+        <mat-tab label="{{'setting.ups.title' | transloco}}">
+            <div class="not-prose flex flex-auto w-full md:w-1/2">
+                <mat-card class="ebc_card_standard">
+                    <mat-card-header>
+                        <mat-card-title>{{'setting.ups.title' | transloco}}</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <form [formGroup]="upsForm" (ngSubmit)="saveUsv()">
+                            <mat-form-field>
+                                <mat-label>{{'setting.ups.ups-code.label' | transloco}}</mat-label>
+                                <input matInput formControlName="upsCode" [readonly]="!isAdmin">
+                                <mat-error *ngIf="hasUpsCodeFieldErrorRequired()">
+                                    {{"setting.ups.ups-code.required-error" | transloco}}
+                                </mat-error>
+                                <mat-error *ngIf="hasUpsCodeFieldErrorPattern()">
+                                    {{"setting.ups.ups-code.pattern-error" | transloco}}
+                                </mat-error>
+                            </mat-form-field>
+                            <button mat-flat-button [color]="'warn'" (click)="deleteUsv(getUsvData.id)"
+                                    *ngIf="isAdmin"
+                            >{{'setting.ups.delete-button' | transloco}}</button>
+                            <button mat-flat-button class="ml-3" [color]="'primary'"
+                                    [disabled]="upsForm.invalid" *ngIf="isAdmin"
+                            >{{'setting.date-time.save-button' | transloco}}</button>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </mat-tab>
+
+        <!--Software-Update  -->
+        <mat-tab label="{{'setting.software-update.title' | transloco}}">
+            <div class="not-prose flex flex-auto w-full md:w-1/2">
+                <ng-container *ngIf="!updateCheck; else updateNotAvailable">
+                    <mat-card class="ebc_card_standard" >
+                        <mat-card-header>
+                            <mat-card-title>{{'setting.software-update.title' | transloco}}</mat-card-title>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <div>
+                                <div class="mb-2">{{'setting.software-update.update-available' | transloco}}</div>
+                                <p>{{'setting.software-update.paraf' | transloco}} : {{versionNumber}}</p>
+                            </div>
+                        </mat-card-content>
+                        <mat-card-actions>
+                            <button mat-flat-button [color]="'primary'" (click)="softwareUpdate()"
+                                    *ngIf="isAdmin"
+                            >{{'setting.software-update.update-button' | transloco}}</button>
+                        </mat-card-actions>
+                    </mat-card>
+                </ng-container>
+                <ng-template #updateNotAvailable>
+                    <mat-card>
+                        <mat-card-header>
+                            <mat-card-title>{{'setting.software-update.title' | transloco}}</mat-card-title>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <div>
+                                <div class="mb-2">{{'setting.software-update.updated' | transloco}}</div>
+                                <p>{{'setting.software-update.updated-information' | transloco}}</p>
+                            </div>
+                        </mat-card-content>
+                    </mat-card>
+                </ng-template>
+            </div>
+        </mat-tab>
+    </mat-tab-group>
+</div>
+

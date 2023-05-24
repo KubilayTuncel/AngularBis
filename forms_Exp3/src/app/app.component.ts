@@ -15,14 +15,15 @@ export class AppComponent implements OnInit{
 
   ngOnInit(): void {
     this.projectStatus = new FormGroup ({
-      'projectname': new FormControl(null,[Validators.required, Validators.pattern('[a-zA-Z]'), this.forbiddenProjectName.bind(this)
+      'projectname': new FormControl(null,[Validators.required, Validators.pattern('[a-zA-Z]'),
+        this.forbiddenProjectName.bind(this)
     ,this.asyncInvalidProjectName]),
       // projectname kissminda Validators.required yazmadigim icin this.forbiddenProjectName kisminda hata aliyordum. Bunu yazinca gitti.
       // Önemli bir nokta
       'email' : new FormControl(null, [Validators.required, Validators.email]),
       'status': new FormControl('Critical')
     })
-    
+
   }
 
   forbiddenProjectName(control:FormControl): {[s:string]:boolean} {
@@ -48,6 +49,6 @@ export class AppComponent implements OnInit{
 
   onSaveProject() {
     console.log(this.projectStatus.value);
-    
+
   }
 }

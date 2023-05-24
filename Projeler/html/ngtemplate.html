@@ -1,0 +1,333 @@
+<div class="flex flex-col flex-auto min-w-0">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:py-8 sm:px-10 border-b bg-card dark:bg-transparent">
+    <div class="flex-1 min-w-0">
+      <!-- Title -->
+      <div class="flex flex-row sm:justify-between mt-2">
+        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate">
+          {{"navbar.sms.title" | transloco}}
+        </h2>
+        <app-signal></app-signal>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <mat-tab-group
+          mat-stretch-tabs="false"
+          mat-align-tabs="start"
+          dynamicHeight
+          class="mat-primary"
+  >
+
+    <!--SMS Configuration-->
+    <mat-tab label="{{'sms.sms-configuration.label' | transloco}}">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex-auto col-span-1">
+          <mat-card class="ebc_card_standard">
+            <mat-card-header>
+              <mat-card-title>{{'sms.sms-configuration.title' | transloco}}</mat-card-title>
+              <mat-card-subtitle></mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="text-start pl-3 text-secondary mt-3">{{'sms.sms-configuration.sim-info.phone-number' | transloco}} : {{phoneInfoModel.phoneNumber}}</div>
+              <div class="text-start pl-3 text-secondary mt-3">{{'sms.sms-configuration.sim-info.manufacturer' | transloco}} : {{phoneInfoModel.manufacturer}}</div>
+              <div class="text-start pl-3 text-secondary mt-3">{{'sms.sms-configuration.sim-info.model' | transloco}} : {{phoneInfoModel.model}}</div>
+              <div class="text-start pl-3 text-secondary mt-3">{{'sms.sms-configuration.sim-info.state' | transloco}} : {{phoneInfoModel.state}}</div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+        <div class="flex-auto col-span-1">
+          <mat-accordion>
+            <mat-expansion-panel class="ebc_expansion_card_standard">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  {{'sms.sms-configuration.mat-panel-title' | transloco}}
+                </mat-panel-title>
+                <mat-panel-description>
+                  {{'sms.sms-configuration.mat-panel-description' | transloco}}
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+              <div class="ebc_expansion_content">
+                <ng-container *ngIf="!pukIsActive; else ActivatedPUK">
+                  <form [formGroup]="pinForm">
+                    <mat-form-field >
+                      <mat-label>PIN</mat-label>
+                      <input matInput formControlName="pin" name="pin" id="pin"
+                             placeholder="{{'sms.sms-configuration.pin-number.label' | transloco}}"
+                             type="password" #pinField [readonly]="!isAdmin">
+                      <button
+                              mat-icon-button
+                              [attr.aria-label]="'sms.sms-configuration.pin-number.label' | transloco"
+                              matTooltip="{{'sms.sms-configuration.pin-number.tooltip' | transloco}}"
+                              [matTooltipPosition]="'above'"
+                              type="button"
+                              (click)="pinField.type === 'password' ? pinField.type = 'text' : pinField.type = 'password'"
+                              matSuffix>
+                        <mat-icon
+                                class="icon-size-4"
+                                *ngIf="pinField.type === 'password'"
+                                [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                        <mat-icon
+                                class="icon-size-4"
+                                *ngIf="pinField.type === 'text'"
+                                [svgIcon]="'heroicons_outline:eye-slash'"></mat-icon>
+                      </button>
+                      <mat-error *ngIf="hasPinFieldErrorRequired()">
+                        {{"sms.sms-configuration.pin-number.required-error" | transloco}}
+                      </mat-error>
+                      <mat-error *ngIf="hasPinFieldErrorPattern()">
+                        {{"sms.sms-configuration.pin-number.pattern-error" | transloco}}
+                      </mat-error>
+                      <mat-error *ngIf="hasPinFieldErrorValue()">
+                        {{"sms.sms-configuration.pin-number.value-error" | transloco}} {{pinVerificationCount}}
+                      </mat-error>
+                    </mat-form-field>
+                    <ng-container *ngIf="!pinVerification; else DeactivateButton" >
+                      <button mat-flat-button type="submit" (click)="pinControl()"
+                              [color]="'primary'" [disabled]="pinForm.invalid" *ngIf="isAdmin"
+                      >{{'sms.sms-configuration.enable' | transloco}}</button>
+                    </ng-container>
+                    <ng-template #DeactivateButton>
+                      <button mat-flat-button type="submit" (click)="pinDeactivatedButton()" *ngIf="isAdmin"
+                              [color]="'warn'">{{'sms.sms-configuration.deactivate' | transloco}}</button>
+                    </ng-template>
+                  </form>
+                </ng-container>
+                <ng-template #ActivatedPUK>
+                  <ng-container *ngIf="!pukVerification; else ResetPin">
+                    <form [formGroup]="pukForm">
+                      <mat-form-field >
+                        <mat-label>PUK</mat-label>
+                        <input matInput formControlName="puk" name="puk" id="puk"
+                               placeholder="{{'sms.sms-configuration.puk-number.label' | transloco}}"
+                               type="password" #pukField [readonly]="!isAdmin">
+                        <button
+                                mat-icon-button
+                                [attr.aria-label]="'sms.sms-configuration.puk-number.label' | transloco"
+                                matTooltip="{{'sms.sms-configuration.puk-number.tooltip' | transloco}}"
+                                [matTooltipPosition]="'above'"
+                                type="button"
+                                (click)="pukField.type === 'password' ? pukField.type = 'text' : pukField.type = 'password'"
+                                matSuffix>
+                          <mat-icon
+                                  class="icon-size-4"
+                                  *ngIf="pukField.type === 'password'"
+                                  [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                          <mat-icon
+                                  class="icon-size-4"
+                                  *ngIf="pukField.type === 'text'"
+                                  [svgIcon]="'heroicons_outline:eye-slash'"></mat-icon>
+                        </button>
+                        <mat-error *ngIf="hasPukFieldErrorRequired()">
+                          {{"sms.sms-configuration.puk-number.required-error" | transloco}}
+                        </mat-error>
+                        <mat-error *ngIf="hasPukFieldErrorPattern()">
+                          {{"sms.sms-configuration.puk-number.pattern-error" | transloco}}
+                        </mat-error>
+                        <mat-error *ngIf="hasPukFieldErrorValue()">
+                          {{"sms.sms-configuration.pin-number.value-error" | transloco}} {{pukVerificationCount}}
+                        </mat-error>
+                      </mat-form-field>
+                      <button mat-flat-button type="submit" (click)="pukControl()" [color]="'primary'"
+                              [disabled]="pukForm.invalid" *ngIf="isAdmin"
+                      >{{'sms.sms-configuration.enable' | transloco}}</button>
+                    </form>
+                  </ng-container>
+                  <ng-template #ResetPin>
+                    <mat-card>
+                      <mat-card-header>
+                        <mat-card-title>
+                          {{'sms.sms-configuration.reset-pin.title' | transloco}}
+                        </mat-card-title>
+                        <mat-card-content>
+                          <form [formGroup]="resetPinForm">
+                            <mat-form-field>
+                              <mat-label>PIN</mat-label>
+                              <input matInput formControlName="resetPin" name="resetPin" id="resetPin"
+                                     type="password" #resetPinField>
+                              <button
+                                      mat-icon-button
+                                      [attr.aria-label]="'sms.sms-configuration.pin-number.label' | transloco"
+                                      matTooltip="{{'sms.sms-configuration.pin-number.tooltip' | transloco}}"
+                                      [matTooltipPosition]="'above'"
+                                      type="button"
+                                      (click)="resetPinField.type === 'password' ? resetPinField.type = 'text' : resetPinField.type = 'password'"
+                                      matSuffix>
+                                <mat-icon
+                                        class="icon-size-4"
+                                        *ngIf="resetPinField.type === 'password'"
+                                        [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                                <mat-icon
+                                        class="icon-size-4"
+                                        *ngIf="resetPinField.type === 'text'"
+                                        [svgIcon]="'heroicons_outline:eye-slash'"></mat-icon>
+                              </button>
+                              <mat-error *ngIf="hasResetPinFieldErrorRequired()">
+                                {{"sms.sms-configuration.pin-number.required-error" | transloco}}
+                              </mat-error>
+                              <mat-error *ngIf="hasResetPinFieldErrorPattern()">
+                                {{"sms.sms-configuration.pin-number.pattern-error" | transloco}}
+                              </mat-error>
+                            </mat-form-field>
+                            <mat-form-field>
+                              <mat-label>{{'sms.sms-configuration.reset-pin.pin-again.label' | transloco}}</mat-label>
+                              <input matInput formControlName="resetPinControl" name="resetPinControl" id="resetPinControl"
+                                     type="password" #resetPinControlField>
+                              <button
+                                      mat-icon-button
+                                      [attr.aria-label]="'sms.sms-configuration.pin-number.label' | transloco"
+                                      matTooltip="{{'sms.sms-configuration.pin-number.tooltip' | transloco}}"
+                                      [matTooltipPosition]="'above'"
+                                      type="button"
+                                      (click)="resetPinControlField.type === 'password' ? resetPinControlField.type = 'text' : resetPinControlField.type = 'password'"
+                                      matSuffix>
+                                <mat-icon
+                                        class="icon-size-4"
+                                        *ngIf="resetPinControlField.type === 'password'"
+                                        [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                                <mat-icon
+                                        class="icon-size-4"
+                                        *ngIf="resetPinControlField.type === 'text'"
+                                        [svgIcon]="'heroicons_outline:eye-slash'"></mat-icon>
+                              </button>
+                              <mat-error *ngIf="hasResetPinControlFieldErrorRequired()">
+                                {{"sms.sms-configuration.reset-pin.pin-again.required-error" | transloco}}
+                              </mat-error>
+                              <mat-error *ngIf="hasResetPinControlFieldErrorPattern()">
+                                {{"sms.sms-configuration.reset-pin.pin-again.pattern-error" | transloco}}
+                              </mat-error>
+                              <mat-error *ngIf="hasResetPinControlFieldErrorMatch()">
+                                {{"sms.sms-configuration.reset-pin.pin-again.mismatch-error" | transloco}}
+                              </mat-error>
+                            </mat-form-field>
+                            <button mat-flat-button type="submit" (click)="pinResetButton()"
+                                    [color]="'primary'" [disabled]="resetPinForm.invalid"
+                                    *ngIf="isAdmin"
+                            >{{'sms.sms-configuration.confirm' | transloco}}</button>
+                          </form>
+                        </mat-card-content>
+                      </mat-card-header>
+                    </mat-card>
+                  </ng-template>
+
+                </ng-template>
+              </div>
+              <div class="flex flex-row">
+
+                <p class="ml-2.5 mt-3"> <mat-icon class="icon-size-4" matPrefix
+                                                  [svgIcon]="'heroicons_solid:information-circle'" ></mat-icon>
+                  {{'sms.sms-configuration.notice-label' | transloco}}
+                </p>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+
+        </div>
+      </div>
+    </mat-tab>
+
+    <!--SMS Sending-->
+    <mat-tab label="SMS"
+    >
+      <mat-card class="ebc_card_standard max-w-120">
+        <mat-card-header>
+          <mat-card-title>{{'sms.send-test-sms.title' | transloco}}</mat-card-title>
+          <mat-card-subtitle></mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="smsForm" (ngSubmit)="onSubmit()">
+            <div class="flex flex-auto gt-xs:flex-row">
+              <mat-form-field class="flex-auto gt-xs:pr-3">
+                <mat-label>{{"sms.send-test-sms.phone-number.label" | transloco}}</mat-label>
+                <input matInput formControlName="phoneNumber" name="phoneNumber">
+                <mat-icon class="icon-size-5" matPrefix
+                          [svgIcon]="'heroicons_solid:phone'">
+                </mat-icon>
+                <mat-error *ngIf="hasPhoneNumberFieldErrorRequired()">
+                  {{"sms.send-test-sms.phone-number.required-error" | transloco}}
+                </mat-error>
+                <mat-error *ngIf="hasPhoneNumberFieldErrorPattern()">
+                  {{"sms.send-test-sms.phone-number.pattern-error" | transloco}}
+                </mat-error>
+              </mat-form-field>
+            </div>
+            <div class="flex flex-auto gt-xs:flex-row">
+              <mat-form-field class="flex-auto gt-xs:pr-3">
+                <mat-label>{{"sms.send-test-sms.message.label" | transloco}}</mat-label>
+                <textarea matInput formControlName="message" name="message">
+                                </textarea>
+                <mat-icon class="icon-size-5" matPrefix
+                          [svgIcon]="'heroicons_solid:chat-alt'">
+                </mat-icon>
+                <mat-error *ngIf="hasNoteFieldErrorMaxLength()">
+                  {{"sms.send-test-sms.message.maxlength-error" | transloco}}
+                </mat-error>
+              </mat-form-field>
+            </div>
+            <div class="flex flex-auto gt-xs:flex-row justify-between">
+              <mat-label class="text-lg">{{"sms.send-test-sms.method" | transloco}}</mat-label>
+              <mat-checkbox formControlName="method" name="method">SMS
+              </mat-checkbox>
+            </div>
+            <div class="from-group flex items-center justify-end mt-4">
+              <button mat-flat-button
+                      class="ml-3"
+                      [color]="'primary'"
+                      type="submit"
+                      [disabled]="!smsForm.valid" *ngIf="isAdmin">
+                <mat-icon
+                        class="icon-size-5 mr-2" [svgIcon]="'heroicons_solid:save'">
+                </mat-icon>
+                {{"sms.send-test-sms.send-button" | transloco}}
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+
+      </mat-card>
+    </mat-tab>
+
+    <!--SMS History-->
+    <mat-tab label="{{'sms.sms-history.label' | transloco}}"
+    >
+      <mat-card class="ebc_card_standard">
+        <mat-card-header>
+          <mat-card-title>{{'sms.sms-history.title' | transloco}}</mat-card-title>
+          <mat-card-subtitle></mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div>
+            <h5 class="font-semibold text-lg mt-2 mb-2">{{'sms.sms-history.notice' | transloco}}</h5>
+            <p class="mt-1"> {{'sms.sms-history.notice-label' | transloco}}</p>
+          </div>
+          <h4 class="font-semibold mt-5">{{'sms.sms-history.sms-outgoing.title' | transloco}}</h4>
+          <mat-divider></mat-divider>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8" *ngFor="let msg of sentMessages">
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title>{{'sms.sms-history.phone' | transloco}} : {{msg.phoneNumber}}</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>{{'sms.sms-history.message' | transloco}} : {{msg.text}}</mat-card-content>
+              <mat-card-content>{{'sms.sms-history.status' | transloco}} : {{msg.status}}</mat-card-content>
+            </mat-card>
+          </div>
+          <h4 class="font-semibold mt-5">{{'sms.sms-history.sms-incoming.title' | transloco}}</h4>
+          <mat-divider></mat-divider>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-4" *ngFor="let msg of receivedMessages">
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title>{{'sms.sms-history.phone' | transloco}} : {{msg.phoneNumber}}</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>{{'sms.sms-history.message' | transloco}} : {{msg.text}}</mat-card-content>
+              <mat-card-content>{{'sms.sms-history.status' | transloco}} : {{msg.status}}</mat-card-content>
+            </mat-card>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </mat-tab>
+
+  </mat-tab-group>
+
+</div>

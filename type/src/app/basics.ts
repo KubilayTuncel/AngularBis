@@ -12,6 +12,10 @@ function add (a:number,b:number) {
     return a+b;
 }
 
+let name2: string= 'kubilay    ';
+name2.endsWith('');
+console.log(name2)
+
 const result = add(2,5)
 
 console.log(result);
@@ -65,7 +69,7 @@ function add2(a:number,b:number){
 }
 
 function print(value:any) {
-    console.log(value);    
+    console.log(value);
 }
 
 // Generics
@@ -91,8 +95,8 @@ class Student { //class i tanimlamanin 2 yolu var biri bnim bildigim gibi uzun y
 
     constructor(
         public firstName:string,
-        public lastName:string, 
-        public age:number, 
+        public lastName:string,
+        public age:number,
         private courses:string[]) {}
 
     enrol(courseName:string) {
@@ -120,7 +124,7 @@ max = {
     age:32,
     greet() {
         console.log('Hello');
-        
+
     },
 }
 
@@ -129,7 +133,7 @@ class Instructor implements Human {
     age: number;
     greet(){
         console.log('HELLO!!!!!');
-        
+
     }
-    
+
 }

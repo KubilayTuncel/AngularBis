@@ -1,0 +1,289 @@
+<div class="flex flex-col flex-auto min-w-0">
+
+  <!-- Header -->
+  <div
+          class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:py-8 sm:px-10 border-b bg-card dark:bg-transparent">
+    <div class="flex-1 min-w-0">
+
+      <!-- Breadcrumbs -->
+      <div>
+        <div class="hidden sm:flex flex-wrap items-center font-medium">
+          <div>
+            <button
+                    class="whitespace-nowrap text-primary-500"
+                    [routerLink]="'/overview'">
+              {{"license.nodes.overview-node" | transloco}}
+            </button>
+          </div>
+          <div class="flex items-center ml-1 whitespace-nowrap">
+            <mat-icon class="icon-size-5 text-secondary"
+                      [svgIcon]="'heroicons_solid:chevron-right'">
+            </mat-icon>
+            <button
+                    class="ml-1 text-primary-500"
+                    [routerLink]="'/ui/license/overview'">
+              {{"license.nodes.license-overview-node" | transloco}}
+            </button>
+          </div>
+          <div class="flex items-center ml-1 whitespace-nowrap">
+            <mat-icon class="icon-size-5 text-secondary"
+                      [svgIcon]="'heroicons_solid:chevron-right'">
+            </mat-icon>
+            <button
+                    class="ml-1 text-primary-500" *ngIf="!editMode">
+              {{"license.nodes.license-creator-node" | transloco}}
+            </button>
+            <button
+                    class="ml-1 text-primary-500" *ngIf="editMode">
+              {{"license.nodes.license-editor-node" | transloco}}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <div class="mt-2">
+        <h2
+                class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate" *ngIf="!editMode">
+          {{"license.editor.create-title" | transloco}}
+        </h2>
+        <h2
+                class="text-3xl md:text-4xl font-extrabold tracking-tight leading-7 sm:leading-10 truncate" *ngIf="editMode">
+          {{"license.editor.modify-title" | transloco}}
+        </h2>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex shrink-0 items-center mt-6 sm:mt-0 sm:ml-4">
+      <button mat-button
+              class="ml-3"
+              [routerLink]="'/ui/license/overview'">
+        <mat-icon class="icon-size-5 mr-2"
+                  [svgIcon]="'heroicons_solid:chevron-left'">
+        </mat-icon>
+        {{"license.overview.button.back" | transloco}}
+      </button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="flex-auto p-8">
+    <div class="max-w-3xl">
+      <form class="flex flex-col p-8 pb-4 bg-card rounded-2xl shadow overflow-hidden" [formGroup]="licenseForm">
+        <div class="flex flex-row grid-cols-2">
+          <mat-form-field class="basis-1/2 pr-1 ">
+            <mat-label>
+              {{"license.editor.fields.name.placeholder" | transloco}}
+            </mat-label>
+            <input matInput
+                   formControlName="name"
+                   name="name"
+                   [readonly]="!isAdmin">
+            <mat-icon class="icon-size-5"
+                      matPrefix
+                      [svgIcon]="'heroicons_solid:document'">
+            </mat-icon>
+            <mat-error *ngIf="hasNameFieldErrorRequired()">
+              {{"license.editor.fields.name.required-error" | transloco}}
+            </mat-error>
+            <mat-error *ngIf="hasNameFieldErrorMaxLength()">
+              {{"license.editor.fields.name.max-length-error" | transloco}}
+            </mat-error>
+            <mat-error *ngIf="hasNameFieldErrorPattern()">
+              {{"license.editor.fields.name.pattern-error" | transloco}}
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field class="basis-1/2 pl-1">
+            <mat-label for="mandators">
+              {{"license.editor.fields.mandator.placeholder" | transloco}}
+            </mat-label>
+            <mat-select formControlName="mandator">
+              <mat-option *ngFor="let mandator of mandators"
+                          [value]="mandator.uuid" >
+                {{mandator.name}}
+              </mat-option>
+            </mat-select>
+            <mat-icon class="icon-size-5" matPrefix
+                      [svgIcon]="'heroicons_solid:user'">
+            </mat-icon>
+            <mat-error *ngIf="hasMandatorFieldErrorRequired()">
+              {{"license.editor.fields.mandator.required-error" | transloco}}
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="flex flex-row grid-cols-2">
+          <mat-form-field class="basis-1/2 pr-1">
+            <mat-label for="keyPairs">
+              {{"license.editor.fields.key-pair.placeholder" | transloco}}
+            </mat-label>
+            <mat-select formControlName="keyPair">
+              <mat-option *ngFor="let keyPair of keyPairs"
+                          [value]="keyPair.uuid">
+                {{keyPair.name}}
+              </mat-option>
+            </mat-select>
+            <mat-icon class="icon-size-5" matPrefix
+                      [svgIcon]="'heroicons_solid:key'">
+            </mat-icon>
+            <mat-error *ngIf="hasKeyPairFieldErrorRequired()">
+              {{"license.editor.fields.key-pair.required-error" | transloco}}
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field class="basis-1/2 pl-1">
+            <mat-label for="modules">
+              {{"license.editor.fields.module.placeholder" | transloco}}
+            </mat-label>
+            <mat-select formControlName="module" multiple>
+              <mat-option *ngFor="let module of modules"
+                          [value]="module.uuid" >
+                {{module.name}}
+              </mat-option>
+            </mat-select>
+            <mat-icon class="icon-size-5"
+                      matPrefix
+                      [svgIcon]="'heroicons_solid:cube'">
+            </mat-icon>
+            <mat-error *ngIf="hasModuleFieldErrorRequired()">
+              {{"license.editor.fields.module.required-error" | transloco}}
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="flex flex-row grid-cols-2" formGroupName="date">
+          <mat-form-field class="basis-1/2 pr-1">
+            <mat-label>
+              {{"license.editor.fields.start-date.placeholder" | transloco}}
+            </mat-label>
+            <input matInput
+                   [matDatepicker]="$any(pickerStart)"
+                   name="startDate"
+                   formControlName="startDate"
+                   [readonly]="!isAdmin"
+                   [min]="minDate"
+                   [max]="maxDate">
+            <mat-datepicker-toggle matPrefix
+                                   [for]="pickerStart">
+            </mat-datepicker-toggle>
+            <mat-datepicker #pickerStart
+                            startView="year"
+                            [startAt]="startDate">
+            </mat-datepicker>
+            <mat-error *ngIf="hasStartDateFieldErrorRequired()">
+              {{"license.editor.fields.start-date.required-error" | transloco}}
+            </mat-error>
+            <mat-error *ngIf="hasStartDateFieldErrorMaxDate()">
+              {{"license.editor.fields.start-date.max-error" | transloco}}
+            </mat-error>
+            <mat-error *ngIf="hasStartDateFieldErrorMinDate()">
+              {{"license.editor.fields.start-date.min-error" | transloco}}
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field class="basis-1/2 pl-1" >
+            <mat-label>
+              {{"license.editor.fields.end-date.placeholder" | transloco}}
+            </mat-label>
+            <input matInput
+                   [matDatepicker]="pickerEnd"
+                   name="endDate"
+                   formControlName="endDate"
+                   [readonly]="!isAdmin"
+                   [min]="licenseForm.get('date.startDate').value"
+                   [max]="maxDate">
+            <mat-datepicker-toggle matPrefix
+                                   [for]="pickerEnd">
+            </mat-datepicker-toggle>
+            <mat-datepicker #pickerEnd
+                            endView="multi-year">
+            </mat-datepicker>
+            <mat-error *ngIf="hasEndDateFieldErrorRequired()">
+              {{"license.editor.fields.end-date.required-error" | transloco}}
+            </mat-error>
+            <mat-error *ngIf="hasEndDateFieldErrorInvalidDate()">
+              {{"license.editor.fields.end-date.validate-error" | transloco}}
+            </mat-error>
+            <mat-error *ngIf="hasEndDateFieldErrorMaxDate()">
+              {{"license.editor.fields.end-date.max-error" | transloco}}
+            </mat-error>
+            <mat-error *ngIf="hasEndDateFieldErrorMinDate()">
+              {{"license.editor.fields.end-date.min-error" | transloco}}
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="flex">
+          <mat-form-field class="basis-1/2 pr-1">
+            <mat-label>{{"license.editor.fields.user-count.placeholder" | transloco}}</mat-label>
+            <input matInput type="number"
+                   formControlName="userCount"
+                   name="userCount"
+                   [readonly]="!isAdmin"
+                   [min]=2
+                   [max]=99999>
+            <mat-icon class="icon-size-5" matPrefix
+                      [svgIcon]="'heroicons_solid:chart-bar'">
+            </mat-icon>
+            <mat-error *ngIf="hasUserCountFieldErrorRequired()">
+              {{"license.editor.fields.user-count.required-error" | transloco}}
+            </mat-error>
+            <mat-error *ngIf="hasUserCountFieldErrorMaxCount()">
+              {{"license.editor.fields.user-count.max-length-error" | transloco}}
+            </mat-error>
+            <mat-error *ngIf="hasUserCountFieldErrorMinCount()">
+              {{"license.editor.fields.user-count.min-length-error" | transloco}}
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="flex">
+          <mat-form-field class="flex-auto">
+            <mat-label>
+              {{"license.editor.fields.note.placeholder" | transloco}}
+            </mat-label>
+            <textarea matInput
+                      cdkTextareaAutosize
+                      [cdkAutosizeMinRows]="3"
+                      formControlName="note"
+                      name="note"
+                      [readonly]="!isAdmin">
+            </textarea>
+            <mat-icon
+                    class="icon-size-5"
+                    matPrefix
+                    [svgIcon]="'heroicons_solid:document-text'"></mat-icon>
+            <mat-error *ngIf="hasNoteFieldErrorMaxLength()">
+              {{"license.editor.fields.note.max-length-error" | transloco}}
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div class="flex items-center justify-end mt-4">
+          <div class="form-group">
+            <button *ngIf="isAdmin"
+                    class="ml-3"
+                    mat-flat-button
+                    (click)="onCancel()"
+                    [color]="'warn'">
+              <mat-icon class="icon-size-5 mr-2"
+                        [svgIcon]="'heroicons_solid:x'">
+              </mat-icon>
+              {{"license.editor.buttons.cancel.label" | transloco}}
+            </button>
+            <button *ngIf="isAdmin"
+                    class="ml-3"
+                    mat-flat-button
+                    [color]="'primary'"
+                    type="button"
+                    [disabled]="licenseForm.invalid"
+                    (click)="onLicenseSaveButtonClicked()">
+              <mat-icon class="icon-size-5 mr-2"
+                        [svgIcon]="'heroicons_solid:save'">
+              </mat-icon>
+              <span>
+                {{"license.editor.buttons.save.label" | transloco}}
+              </span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
